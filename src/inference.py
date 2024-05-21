@@ -44,7 +44,6 @@ def predict(model, device, test_dir, output_csv, transform):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Inference for bird classification model")
     parser.add_argument('--test_dir', type=str, required=True, help="Path to the test images directory")
-    parser.add_argument('--output_csv', type=str, required=True, help="Path to save the output CSV file")
     parser.add_argument('--model_name', type=str, required=True, help="Name of the model to use")
     parser.add_argument('--num_classes', type=int, default=30, help="Number of classes in the model")
 
@@ -60,4 +59,5 @@ if __name__ == "__main__":
 
     model = load_model(args.model_name, args.num_classes, model_path, device)
 
-    predict(model, device, args.test_dir, args.output_csv, val_transform)
+    output_csv = f'./submissions/submission_{args.model_name}.csv'
+    predict(model, device, args.test_dir, output_csv, val_transform)
