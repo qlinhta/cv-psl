@@ -10,14 +10,24 @@ import time
 from models import get_model
 import logging
 import coloredlogs
+import os
 
 logger = logging.getLogger(__name__)
 coloredlogs.install(level='DEBUG', logger=logger, fmt='%(asctime)s [%(levelname)s] %(message)s')
 
 
+def save_model(model, epoch, model_name, best=False):
+    model_dir = 'saved_models'
+    if not os.path.exists(model_dir):
+        os.makedirs(model_dir)
+    suffix = 'best' if best else f'epoch_{epoch}'
+    model_path = os.path.join(model_dir, f"{model_name}_{suffix}.pth")
+    torch.save(model.state_dict(), model_path)
+    logger.info(f"Model saved to {model_path}")
+
+
 def train_model(train_loader, val_loader, device, model_name, num_epochs=10):
     model = get_model(model_name, num_classes=30)
-
     model = model.to(device)
 
     criterion = nn.CrossEntropyLoss()
@@ -25,13 +35,13 @@ def train_model(train_loader, val_loader, device, model_name, num_epochs=10):
 
     acc_train, acc_val = [], []
     loss_train, loss_val = [], []
+    best_val_accuracy = 0.0
 
     for epoch in range(num_epochs):
         model.train()
         running_loss = 0.0
         correct = 0
         total = 0
-        start_time = time.time()
         train_bar = tqdm(train_loader, desc=f"Epoch {epoch + 1}/{num_epochs} Training")
         for images, labels in train_bar:
             images, labels = images.to(device), labels.to(device)
@@ -52,8 +62,6 @@ def train_model(train_loader, val_loader, device, model_name, num_epochs=10):
         train_accuracy = 100 * correct / total
         loss_train.append(train_loss)
         acc_train.append(train_accuracy)
-
-        print(f"Epoch {epoch + 1}/{num_epochs} Training - Loss: {train_loss:.4f}, Accuracy: {train_accuracy:.2f}%")
 
         model.eval()
         val_loss = 0.0
@@ -76,12 +84,14 @@ def train_model(train_loader, val_loader, device, model_name, num_epochs=10):
         loss_val.append(val_loss)
         acc_val.append(val_accuracy)
 
-        print(f"Epoch {epoch + 1}/{num_epochs} Validation - Loss: {val_loss:.4f}, Accuracy: {val_accuracy:.2f}%")
-
         table = PrettyTable()
-        table.field_names = ["Epoch", "Train Loss", "Train Accuracy", "Val Loss", "Val Accuracy"]
-        table.add_row([epoch + 1, train_loss, train_accuracy, val_loss, val_accuracy])
+        table.field_names = ["Epoch", "Train Loss", "Val Loss", "Train Accur.", "Val Accur."]
+        table.add_row([epoch + 1, train_loss, val_loss, train_accuracy, val_accuracy])
         print(table)
+
+        if val_accuracy > best_val_accuracy:
+            best_val_accuracy = val_accuracy
+            save_model(model, epoch + 1, model_name, best=True)
 
     figure_train_val(model_name, acc_train, acc_val, loss_train, loss_val, save=True)
 

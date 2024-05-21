@@ -44,7 +44,7 @@ def figure_train_val(model_name, acc_train, acc_val, loss_train, loss_val, save=
     ax[1].set_title('Loss')
     ax[1].legend()
     ax[1].grid(grid)
-    fig.suptitle('Train and Val Metrics for ' + model_name)
+    fig.suptitle(model_name)
 
     if save:
         path = os.path.join('figures', 'train_val_metrics_' + model_name + '.pdf')
