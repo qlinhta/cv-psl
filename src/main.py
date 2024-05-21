@@ -6,11 +6,10 @@ from builder import loader, augment, device
 from tools import figure_train_val
 from tqdm import tqdm
 from prettytable import PrettyTable
-import time
-from models import get_model
 import logging
 import coloredlogs
 import os
+from models import get_model_by_id
 
 logger = logging.getLogger(__name__)
 coloredlogs.install(level='DEBUG', logger=logger, fmt='%(asctime)s [%(levelname)s] %(message)s')
@@ -26,9 +25,10 @@ def save_model(model, epoch, model_name, best=False):
     logger.info(f"Model saved to {model_path}")
 
 
-def train_model(train_loader, val_loader, device, model_name, num_epochs=10):
-    model = get_model(model_name, num_classes=30)
-    model = model.to(device)
+def train_model(train_loader, val_loader, device, model_id, num_epochs=10):
+    model_info = get_model_by_id(model_id)
+    model = model_info.get_model().to(device)
+    model_name = model_info.name
 
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.AdamW(model.parameters(), lr=1e-4)
@@ -105,15 +105,32 @@ if __name__ == "__main__":
     parser.add_argument('--batch_size', type=int, default=32, help="Batch size for the dataloaders")
     parser.add_argument('--num_workers', type=int, default=8, help="Number of workers for the dataloaders")
     parser.add_argument('--num_epochs', type=int, default=10, help="Number of epochs for training")
-    parser.add_argument('--model_name', type=str, default='resnet18', help="Name of the model to use")
+    parser.add_argument('--model_id', type=int, required=True, help="ID of the model to use")
+    parser.add_argument('--num_classes', type=int, default=30, help="Number of output classes")
 
     args = parser.parse_args()
 
-    logger.info("Using model: {}".format(args.model_name))
+    logger.info("Using model ID: {}".format(args.model_id))
+    model_info = get_model_by_id(args.model_id)
+    logger.info("Using model: {}".format(model_info.name))
+    logger.info("Number of output classes: {}".format(args.num_classes))
+    logger.info("Number of epochs: {}".format(args.num_epochs))
+    logger.info("Batch size: {}".format(args.batch_size))
+    logger.info("Number of workers: {}".format(args.num_workers))
 
     train_transform, val_transform = augment()
-    train_loader, val_loader = loader(args.train_csv, args.val_csv, args.train_dir, args.val_dir, args.batch_size,
-                                      args.num_workers, train_transform, val_transform)
+
+    train_loader, val_loader = loader(
+        args.train_csv,
+        args.val_csv,
+        args.train_dir,
+        args.val_dir,
+        args.batch_size,
+        args.num_workers,
+        train_transform,
+        val_transform
+    )
+
     device = device()
 
-    train_model(train_loader, val_loader, device, args.model_name, args.num_epochs)
+    train_model(train_loader, val_loader, device, args.model_id, args.num_epochs)

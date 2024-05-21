@@ -17,7 +17,7 @@ plt.rc('lines', markersize=10)
 
 
 def figure_train_val(model_name, acc_train, acc_val, loss_train, loss_val, save=False):
-    fig, ax = plt.subplots(1, 2, figsize=(12, 6))
+    fig, ax = plt.subplots(1, 2, figsize=(13, 6))
     marker = ["o", "v"]
     color = ["blue", "red"]
     linestyle = ["--", "-"]
