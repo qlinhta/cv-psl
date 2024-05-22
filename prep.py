@@ -5,6 +5,7 @@ from io import BytesIO
 import subprocess
 import sys
 
+
 # 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
 
 
@@ -16,12 +17,6 @@ def setup_git_config(email, name):
 
 
 def main():
-    file_id = "1IEnpbGjNqXYF4vPY1NW-ODcrYZomyb4S"
-    raw_dataset_path = './raw-dataset'
-
-    if not os.path.exists(raw_dataset_path):
-        os.makedirs(raw_dataset_path)
-
     with zipfile.ZipFile('raw-dataset.zip', 'r') as zip_ref:
         zip_ref.extractall('.')
 
