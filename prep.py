@@ -3,20 +3,9 @@ import requests
 import zipfile
 from io import BytesIO
 import subprocess
+import sys
 
-
-def download_and_extract_zip_from_google_drive(file_id, extract_to='./raw-dataset'):
-    google_drive_url = f"https://drive.google.com/uc?export=download&id={file_id}"
-    response = requests.get(google_drive_url)
-
-    if 'content-disposition' not in response.headers:
-        warning_url = google_drive_url + "&confirm=t"
-        response = requests.get(warning_url)
-
-    with zipfile.ZipFile(BytesIO(response.content)) as zip_file:
-        print(f'Extracting files to {extract_to}')
-        zip_file.extractall(extract_to)
-    print("Extraction complete!")
+# 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
 
 
 def setup_git_config(email, name):
@@ -33,7 +22,8 @@ def main():
     if not os.path.exists(raw_dataset_path):
         os.makedirs(raw_dataset_path)
 
-    download_and_extract_zip_from_google_drive(file_id, raw_dataset_path)
+    with zipfile.ZipFile('raw-dataset.zip', 'r') as zip_ref:
+        zip_ref.extractall('.')
 
     email = "qlinhta@outlook.com"
     name = "Quyen Linh TA"
