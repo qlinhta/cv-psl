@@ -31,6 +31,7 @@ available_models = [
     Model(6, 'nfnet_f0', num_classes=30, pretrained=False),
     Model(7, 'deit_small_patch16_224', num_classes=30),
     Model(8, 'regnety_040', num_classes=30),
+    Model(9, 'resnest50d', num_classes=30),
 ]
 
 
