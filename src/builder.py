@@ -52,6 +52,30 @@ def augment():
     return train_transform, val_transform
 
 
+"""def augment():
+    logger.info("Creating data augmentation transforms")
+    train_transform = transforms.Compose([
+        transforms.Resize(256),
+        transforms.RandomResizedCrop(224),
+        transforms.RandomHorizontalFlip(),
+        transforms.RandomVerticalFlip(),
+        transforms.RandomRotation(15),
+        transforms.ColorJitter(brightness=0.3, contrast=0.3, saturation=0.3, hue=0.2),
+        transforms.RandomGrayscale(p=0.1),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+    ])
+
+    val_transform = transforms.Compose([
+        transforms.Resize(256),
+        transforms.CenterCrop(224),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+    ])
+
+    return train_transform, val_transform"""
+
+
 def loader(train_csv, val_csv, train_dir, val_dir, batch_size, num_workers, train_transform, val_transform):
     logger.info("Loading data")
     train_dataset = BirdDataset(csv_file=train_csv, root_dir=train_dir, transform=train_transform)

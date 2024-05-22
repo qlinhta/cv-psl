@@ -31,7 +31,8 @@ def train_model(train_loader, val_loader, device, model_id, num_epochs=10):
     model_name = model_info.name
 
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.AdamW(model.parameters(), lr=1e-4)
+    # parameters: {'batch_size': 128, 'lr': 5.728983638103915e-05, 'weight_decay': 0.0005535766560991741}, lr=1e-4
+    optimizer = optim.AdamW(model.parameters(), lr=5.728983638103915e-05)
 
     acc_train, acc_val = [], []
     loss_train, loss_val = [], []

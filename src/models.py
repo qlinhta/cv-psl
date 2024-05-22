@@ -31,7 +31,14 @@ available_models = [
     Model(6, 'nfnet_f0', num_classes=30, pretrained=False),
     Model(7, 'deit_small_patch16_224', num_classes=30),
     Model(8, 'regnety_040', num_classes=30),
-    Model(9, 'resnest50d', num_classes=30),
+    Model(9, 'cait_s24_224', num_classes=30),
+    Model(10, 'coat_lite_small', num_classes=30),
+    Model(11, 'levit_128s', num_classes=30),
+    Model(12, 'pvt_v2_b2', num_classes=30),
+    Model(13, 'tnt_s_patch16_224', num_classes=30),
+    Model(14, 'twins_svt_small', num_classes=30),
+    Model(15, 'efficientformer_l1', num_classes=30),
+    Model(16, 'vit_small_patch16_224.augreg_in21k_ft_in1k', num_classes=30),
 ]
 
 
