@@ -109,7 +109,7 @@ def train_model(train_loader, val_loader, device, model_id, num_epochs=10):
         table.add_row([epoch + 1, train_loss, val_loss, train_accuracy, val_accuracy])
         print(table)
 
-        if val_accuracy > best_val_accuracy:
+        if val_accuracy >= best_val_accuracy:
             best_val_accuracy = val_accuracy
             save_model(model, epoch + 1, model_name, best=True)
 
