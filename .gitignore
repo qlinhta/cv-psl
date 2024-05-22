@@ -3,3 +3,6 @@ raw-dataset
 dataset
 .idea
 saved_models
+cropped_dataset
+yolov8x.pt
+raw-dataset.zip

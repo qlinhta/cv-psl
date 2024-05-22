@@ -12,7 +12,7 @@ import logging
 import coloredlogs
 
 logger = logging.getLogger(__name__)
-coloredlogs.install(level='DEBUG', logger=logger, fmt='%(asctime)s [%(levelname)s] %(message)s')
+coloredlogs.install(level='INFO', logger=logger, fmt='%(asctime)s [%(levelname)s] %(message)s')
 
 
 def objective(trial, config, train_csv, val_csv, train_dir, val_dir, num_workers, num_epochs, model_id):

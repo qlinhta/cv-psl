@@ -10,9 +10,10 @@ import logging
 import coloredlogs
 import os
 from models import get_model_by_id
+from torchvision.utils import save_image
 
 logger = logging.getLogger(__name__)
-coloredlogs.install(level='DEBUG', logger=logger, fmt='%(asctime)s [%(levelname)s] %(message)s')
+coloredlogs.install(level='INFO', logger=logger, fmt='%(asctime)s [%(levelname)s] %(message)s')
 
 
 def save_model(model, epoch, model_name, best=False):
@@ -25,18 +26,30 @@ def save_model(model, epoch, model_name, best=False):
     logger.info(f"Model saved to {model_path}")
 
 
+def save_batch_images(images, labels, phase, num_images=8):
+    dump_dir = os.path.join('dumps', phase)
+    if not os.path.exists(dump_dir):
+        os.makedirs(dump_dir)
+
+    num_images_to_save = min(num_images, images.size(0))
+    for i in range(num_images_to_save):
+        save_image(images[i], os.path.join(dump_dir, f'image_{i}_label_{labels[i].item()}.png'))
+
+
 def train_model(train_loader, val_loader, device, model_id, num_epochs=10):
     model_info = get_model_by_id(model_id)
     model = model_info.get_model().to(device)
     model_name = model_info.name
 
     criterion = nn.CrossEntropyLoss()
-    # parameters: {'batch_size': 128, 'lr': 5.728983638103915e-05, 'weight_decay': 0.0005535766560991741}, lr=1e-4
     optimizer = optim.AdamW(model.parameters(), lr=5.728983638103915e-05)
 
     acc_train, acc_val = [], []
     loss_train, loss_val = [], []
     best_val_accuracy = 0.0
+
+    train_images_saved = False
+    val_images_saved = False
 
     for epoch in range(num_epochs):
         model.train()
@@ -44,7 +57,10 @@ def train_model(train_loader, val_loader, device, model_id, num_epochs=10):
         correct = 0
         total = 0
         train_bar = tqdm(train_loader, desc=f"Epoch {epoch + 1}/{num_epochs} Training")
-        for images, labels in train_bar:
+        for batch_idx, (images, labels) in enumerate(train_bar):
+            if not train_images_saved:
+                save_batch_images(images, labels, 'train')
+                train_images_saved = True
             images, labels = images.to(device), labels.to(device)
             optimizer.zero_grad()
             outputs = model(images)
@@ -70,7 +86,10 @@ def train_model(train_loader, val_loader, device, model_id, num_epochs=10):
         total = 0
         val_bar = tqdm(val_loader, desc=f"Epoch {epoch + 1}/{num_epochs} Validation")
         with torch.no_grad():
-            for images, labels in val_bar:
+            for batch_idx, (images, labels) in enumerate(val_bar):
+                if not val_images_saved:
+                    save_batch_images(images, labels, 'val')
+                    val_images_saved = True
                 images, labels = images.to(device), labels.to(device)
                 outputs = model(images)
                 loss = criterion(outputs, labels)

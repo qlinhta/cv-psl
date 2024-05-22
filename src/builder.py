@@ -2,13 +2,15 @@ import os
 import pandas as pd
 from PIL import Image
 from torch.utils.data import Dataset, DataLoader
-from torchvision import transforms
 import torch
 import logging
 import coloredlogs
+import albumentations as A
+from albumentations.pytorch import ToTensorV2
+import numpy as np
 
 logger = logging.getLogger(__name__)
-coloredlogs.install(level='DEBUG', logger=logger, fmt='%(asctime)s [%(levelname)s] %(message)s')
+coloredlogs.install(level='INFO', logger=logger, fmt='%(asctime)s [%(levelname)s] %(message)s')
 
 
 class BirdDataset(Dataset):
@@ -27,53 +29,101 @@ class BirdDataset(Dataset):
         label = self.labels_df.iloc[idx, 1]
 
         if self.transform:
-            image = self.transform(image)
+            image = self.transform(image=np.array(image))['image']
 
         return image, label
 
 
-def augment():
-    logger.info("Creating data augmentation transforms")
-    train_transform = transforms.Compose([
-        transforms.Resize(256),
-        transforms.RandomResizedCrop(224),
-        transforms.RandomHorizontalFlip(),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-    ])
-
-    val_transform = transforms.Compose([
-        transforms.Resize(256),
-        transforms.CenterCrop(224),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-    ])
-
-    return train_transform, val_transform
-
-
 """def augment():
     logger.info("Creating data augmentation transforms")
-    train_transform = transforms.Compose([
-        transforms.Resize(256),
-        transforms.RandomResizedCrop(224),
-        transforms.RandomHorizontalFlip(),
-        transforms.RandomVerticalFlip(),
-        transforms.RandomRotation(15),
-        transforms.ColorJitter(brightness=0.3, contrast=0.3, saturation=0.3, hue=0.2),
-        transforms.RandomGrayscale(p=0.1),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+    train_transform = A.Compose([
+        A.RandomRotate90(),
+        A.Flip(),
+        A.Transpose(),
+        A.CoarseDropout(p=0.1),
+        A.OneOf([
+            A.GaussNoise(),
+        ], p=0.2),
+        A.OneOf([
+            A.MotionBlur(p=.2),
+            A.MedianBlur(blur_limit=3, p=0.1),
+            A.Blur(blur_limit=3, p=0.1),
+        ], p=0.2),
+        A.ShiftScaleRotate(shift_limit=0.0625, scale_limit=0.2, rotate_limit=45, p=0.4),
+        A.OneOf([
+            A.OpticalDistortion(p=0.3),
+            A.GridDistortion(p=.1),
+            A.PiecewiseAffine(p=0.3),
+        ], p=0.2),
+        A.OneOf([
+            A.CLAHE(clip_limit=2),
+            A.Sharpen(),
+            A.Emboss(),
+            A.RandomBrightnessContrast(),
+        ], p=0.3),
+        A.OneOf([
+            A.HueSaturationValue(hue_shift_limit=0, sat_shift_limit=10, val_shift_limit=10, p=0.1),
+            A.ColorJitter(brightness=0.3, contrast=0.1, saturation=0.1, hue=0.1, p=0.1),
+        ]),
+        A.Resize(224, 224, interpolation=1),
+        A.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+        ToTensorV2()
     ])
 
-    val_transform = transforms.Compose([
-        transforms.Resize(256),
-        transforms.CenterCrop(224),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+    val_transform = A.Compose([
+        A.Resize(224, 224, interpolation=1),
+        A.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+        ToTensorV2()
     ])
 
     return train_transform, val_transform"""
+
+"""def augment():
+    logger.info("Creating data augmentation transforms")
+    train_transform = A.Compose([
+        A.RandomRotate90(),
+        A.Flip(),
+        A.Transpose(),
+        A.RandomBrightnessContrast(),
+        A.HueSaturationValue(),
+        A.RGBShift(),
+        A.ElasticTransform(p=0.1),
+        A.GridDistortion(p=0.1),
+        A.OpticalDistortion(p=0.1),
+        A.CoarseDropout(p=0.1),
+        A.Blur(blur_limit=3),
+        A.Resize(224, 224),
+        A.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+        ToTensorV2()
+    ])
+
+    val_transform = A.Compose([
+        A.Resize(224, 224),
+        A.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+        ToTensorV2()
+    ])
+
+    return train_transform, val_transform"""
+
+
+def augment():
+    logger.info("Creating data augmentation transforms")
+    train_transform = A.Compose([
+        A.Resize(256, 256),
+        A.RandomResizedCrop(224, 224),
+        A.HorizontalFlip(),
+        A.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+        ToTensorV2()
+    ])
+
+    val_transform = A.Compose([
+        A.Resize(256, 256),
+        A.CenterCrop(224, 224),
+        A.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+        ToTensorV2()
+    ])
+
+    return train_transform, val_transform
 
 
 def loader(train_csv, val_csv, train_dir, val_dir, batch_size, num_workers, train_transform, val_transform):

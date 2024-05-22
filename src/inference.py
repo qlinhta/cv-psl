@@ -8,9 +8,10 @@ from models import get_model_by_id
 from builder import augment, device
 import logging
 import coloredlogs
+import numpy as np
 
 logger = logging.getLogger(__name__)
-coloredlogs.install(level='DEBUG', logger=logger, fmt='%(asctime)s [%(levelname)s] %(message)s')
+coloredlogs.install(level='INFO', logger=logger, fmt='%(asctime)s [%(levelname)s] %(message)s')
 
 
 def load_model(model_id, model_path, device):
@@ -30,7 +31,8 @@ def predict(model, device, test_dir, output_csv, transform):
     for image_file in tqdm(image_files, desc="Predicting"):
         image_path = os.path.join(test_dir, image_file)
         image = Image.open(image_path).convert('RGB')
-        image = transform(image).unsqueeze(0).to(device)
+        augmented = transform(image=np.array(image))
+        image = augmented['image'].unsqueeze(0).to(device)
 
         with torch.no_grad():
             output = model(image)
