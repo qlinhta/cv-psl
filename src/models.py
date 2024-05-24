@@ -23,21 +23,10 @@ class Model:
 
 
 available_models = [
-    Model(1, 'vit_small_patch16_224', num_classes=30),
-    Model(2, 'vit_small_patch16_224.augreg_in1k', num_classes=30),
-    Model(3, 'vit_small_patch16_224.augreg_in21k_ft_in1k', num_classes=30),
-    Model(4, 'swin_tiny_patch4_window7_224', num_classes=30),
-    Model(5, 'swin_tiny_patch4_window7_224.ms_in1k', num_classes=30),
-    Model(6, 'swin_tiny_patch4_window7_224.ms_in22k', num_classes=30),
-    Model(7, 'swin_tiny_patch4_window7_224.ms_in22k_ft_in1k', num_classes=30),
-    Model(8, 'swin_base_patch4_window7_224', num_classes=30),
-    Model(9, 'swin_base_patch4_window7_224.ms_in1k', num_classes=30),
-    Model(10, 'swin_base_patch4_window7_224.ms_in21k', num_classes=30),
-    Model(11, 'swin_base_patch4_window7_224.ms_in21k_ft_in1k', num_classes=30),
+    Model(1, 'swin_tiny_patch4_window7_224.ms_in22k_ft_in1k', num_classes=30),
+    Model(2, 'swin_base_patch4_window7_224.ms_in22k_ft_in1k', num_classes=30),
+    Model(3, 'swin_large_patch4_window7_224.ms_in22k_ft_in1k', num_classes=30)
 ]
-
-
-# parameters: {'batch_size': 128, 'lr': 5.728983638103915e-05, 'weight_decay': 0.0005535766560991741}, lr=1e-4
 
 
 def get_model_by_id(model_id):
