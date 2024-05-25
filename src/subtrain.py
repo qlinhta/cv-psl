@@ -23,9 +23,9 @@ def save_model(model, epoch, optimizer, path):
     torch.save(state, path)
 
 
-def load_pretrained_weights(model, model_name, num_classes):
-    print(f"Loading pretrained weights for {model_name}")
-    pretrained_model = timm.create_model(model_name, pretrained=True)
+def load_pretrained_weights(model, pretrained_model_name, num_classes):
+    print(f"Loading pretrained weights for {pretrained_model_name}")
+    pretrained_model = timm.create_model(pretrained_model_name, pretrained=True)
     pretrained_dict = pretrained_model.state_dict()
     model_dict = model.state_dict()
 
@@ -54,7 +54,7 @@ def build_model(model_name, num_classes=30, pretrained=True):
         raise ValueError(f"Unknown model name: {model_name}")
 
     if pretrained:
-        pretrained_model_name = "swin_base_patch4_window7_224"
+        pretrained_model_name = "swin_large_patch4_window7_224.ms_in22k_ft_in1k"
         model = load_pretrained_weights(model, pretrained_model_name, num_classes)
 
     return model
