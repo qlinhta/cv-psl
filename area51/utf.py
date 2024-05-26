@@ -10,8 +10,8 @@ def clean_csv(csv_path, cleaned_csv_path):
 
 
 if __name__ == "__main__":
-    train_csv = './dataset/train_labels.csv'
-    val_csv = './dataset/val_labels.csv'
+    train_csv = './dataset/train.csv'
+    val_csv = './dataset/val.csv'
     clean_train_csv = './dataset/train_labels_utf8.csv'
     clean_val_csv = './dataset/val_labels_utf8.csv'
 

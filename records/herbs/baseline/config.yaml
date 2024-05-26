@@ -1,5 +1,5 @@
-train_csv: "./dataset/train_labels.csv"
-val_csv: "./dataset/val_labels.csv"
+train_csv: "./dataset/train.csv"
+val_csv: "./dataset/val.csv"
 train_dir: "./dataset/train"
 val_dir: "./dataset/val"
 batch_size: 32

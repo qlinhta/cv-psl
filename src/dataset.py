@@ -46,8 +46,8 @@ def dataset(raw_dataset_path, output_dataset_path, classes_file):
     train_labels_df = pd.DataFrame(train_labels, columns=['image_name', 'label_idx', 'label'])
     val_labels_df = pd.DataFrame(val_labels, columns=['image_name', 'label_idx', 'label'])
 
-    train_labels_df.to_csv(os.path.join(output_dataset_path, 'train_labels.csv'), index=False)
-    val_labels_df.to_csv(os.path.join(output_dataset_path, 'val_labels.csv'), index=False)
+    train_labels_df.to_csv(os.path.join(output_dataset_path, 'train.csv'), index=False)
+    val_labels_df.to_csv(os.path.join(output_dataset_path, 'val.csv'), index=False)
 
     test_images_path = os.path.join(raw_dataset_path, 'test_images')
     test_images = os.listdir(test_images_path)
