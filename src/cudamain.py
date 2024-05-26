@@ -2,7 +2,7 @@ import argparse
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from builder import loader, augment, device as device_util
+from builder import loader, augment, device
 from tools import figure_train_val
 from tqdm import tqdm
 from prettytable import PrettyTable
@@ -22,7 +22,10 @@ def save_model(model, epoch, model_name, best=False):
         os.makedirs(model_dir)
     suffix = 'best' if best else f'epoch_{epoch}'
     model_path = os.path.join(model_dir, f"{model_name}_{suffix}.pth")
-    torch.save(model.state_dict(), model_path)
+    if isinstance(model, nn.DataParallel) or isinstance(model, nn.parallel.DistributedDataParallel):
+        torch.save(model.module.state_dict(), model_path)
+    else:
+        torch.save(model.state_dict(), model_path)
     logger.info(f"Model saved to {model_path}")
 
 
@@ -30,7 +33,6 @@ def save_batch_images(images, labels, phase, num_images=8):
     dump_dir = os.path.join('dumps', phase)
     if not os.path.exists(dump_dir):
         os.makedirs(dump_dir)
-
     num_images_to_save = min(num_images, images.size(0))
     for i in range(num_images_to_save):
         save_image(images[i], os.path.join(dump_dir, f'image_{i}_label_{labels[i].item()}.png'))
@@ -39,15 +41,14 @@ def save_batch_images(images, labels, phase, num_images=8):
 def train_model(train_loader, val_loader, device, model_id, num_epochs=10):
     model_info = get_model_by_id(model_id)
     model = model_info.get_model()
-
-    # Wrap model with DataParallel to use multiple GPUs
     if torch.cuda.device_count() > 1:
+        logger.info(f"Using {torch.cuda.device_count()} GPUs")
         model = nn.DataParallel(model)
     model = model.to(device)
-
     model_name = model_info.name
 
     criterion = nn.CrossEntropyLoss()
+    # parameters: {'batch_size': 64, 'lr': 9.434481735258526e-05, 'weight_decay': 0.0002947548743067438}. Best is trial 0 with value: 95.55555555555556.
     optimizer = optim.AdamW(model.parameters(), lr=5.728983638103915e-05)
 
     acc_train, acc_val = [], []
@@ -157,12 +158,6 @@ if __name__ == "__main__":
         val_transform
     )
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-    for subdir in ['train', 'val']:
-        dump_dir = os.path.join('dumps', subdir)
-        if os.path.exists(dump_dir):
-            for filename in os.listdir(dump_dir):
-                os.remove(os.path.join(dump_dir, filename))
+    device = device()
 
     train_model(train_loader, val_loader, device, args.model_id, args.num_epochs)
