@@ -153,4 +153,10 @@ if __name__ == "__main__":
 
     device = device()
 
+    for subdir in ['train', 'val']:
+        dump_dir = os.path.join('dumps', subdir)
+        if os.path.exists(dump_dir):
+            for filename in os.listdir(dump_dir):
+                os.remove(os.path.join(dump_dir, filename))
+
     train_model(train_loader, val_loader, device, args.model_id, args.num_epochs)

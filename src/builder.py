@@ -37,21 +37,22 @@ class BirdDataset(Dataset):
 def augment():
     logger.info("Creating data augmentation transforms")
     train_transform = A.Compose([
-        A.Resize(256, 256),
+        # A.Resize(256, 256),
+        A.Resize(224, 224),
         A.RandomResizedCrop(224, 224),
         A.HorizontalFlip(),
         A.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
         ToTensorV2()
     ])
 
-    val_transform = A.Compose([
-        A.Resize(256, 256),
+    val_test_transform = A.Compose([
+        # A.Resize(256, 256),
         A.CenterCrop(224, 224),
         A.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
         ToTensorV2()
     ])
 
-    return train_transform, val_transform
+    return train_transform, val_test_transform
 
 
 def loader(train_csv, val_csv, train_dir, val_dir, batch_size, num_workers, train_transform, val_transform):
