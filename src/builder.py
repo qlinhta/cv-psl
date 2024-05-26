@@ -131,10 +131,10 @@ def loader(train_csv, val_csv, train_dir, val_dir, batch_size, num_workers, trai
     train_dataset = BirdDataset(csv_file=train_csv, root_dir=train_dir, transform=train_transform)
     val_dataset = BirdDataset(csv_file=val_csv, root_dir=val_dir, transform=val_transform)
 
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers)
-    # pin_memory=True, prefetch_factor=4, persistent_workers=True)
-    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers)
-    # pin_memory=True, prefetch_factor=4, persistent_workers=True)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers,
+                              pin_memory=True, prefetch_factor=4, persistent_workers=True)
+    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers, pin_memory=True,
+                            prefetch_factor=4, persistent_workers=True)
 
     return train_loader, val_loader
 
