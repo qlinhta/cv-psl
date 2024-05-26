@@ -2,12 +2,12 @@ import argparse
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from builder import loader, augment, device
-from tools import figure_train_val
+from src.builder import loader, augment, device
+from src.tools import figure_train_val
 from tqdm import tqdm
 import logging
 import coloredlogs
-from swtr.network import swin_t, swin_s, swin_b, swin_l
+from network import swin_t, swin_s, swin_b, swin_l
 import timm
 
 logger = logging.getLogger(__name__)
