@@ -34,14 +34,12 @@ def crop_and_resize_image(image, bbox, output_size=(224, 224)):
     width = x2 - x1
     height = y2 - y1
 
-    # Ensure square crop with padding if necessary
     max_side = max(width, height)
     new_x1 = max(0, x1 - (max_side - width) // 2)
     new_y1 = max(0, y1 - (max_side - height) // 2)
     new_x2 = min(image.shape[1], new_x1 + max_side)
     new_y2 = min(image.shape[0], new_y1 + max_side)
 
-    # Adjust if crop goes out of image bounds
     if new_x2 - new_x1 < max_side:
         if new_x1 == 0:
             new_x2 = max_side
@@ -58,7 +56,7 @@ def crop_and_resize_image(image, bbox, output_size=(224, 224)):
     return resized_image
 
 
-def resize_image(image, output_size=(224, 224)):
+def resize_image(image, output_size=(300, 300)):
     resized_image = cv2.resize(image, output_size, interpolation=cv2.INTER_AREA)
     return resized_image
 

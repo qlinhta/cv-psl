@@ -9,14 +9,7 @@ import albumentations as A
 from albumentations.pytorch import ToTensorV2
 import numpy as np
 import cuda_transforms
-from torch.nn.parallel import DataParallel
 from torch.backends import cudnn
-from torch import nn, optim
-from prettytable import PrettyTable
-from tqdm import tqdm
-from torchvision.utils import save_image
-from src.tools import figure_train_val
-from src.models import get_model_by_id
 
 logger = logging.getLogger(__name__)
 coloredlogs.install(level='INFO', logger=logger, fmt='%(asctime)s [%(levelname)s] %(message)s')
