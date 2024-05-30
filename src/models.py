@@ -22,15 +22,16 @@ class Model:
         return self.name
 
 
-available_models = [
-    Model(1, 'swin_tiny_patch4_window7_224.ms_in22k_ft_in1k', num_classes=30),
-    Model(2, 'swin_base_patch4_window7_224.ms_in22k_ft_in1k', num_classes=30),
-    Model(3, 'swin_large_patch4_window7_224.ms_in22k_ft_in1k', num_classes=30)
-]
-
-
 def get_model_by_id(model_id):
     for model in available_models:
         if model.model_id == model_id:
             return model
     raise ValueError(f"Model ID {model_id} not recognized.")
+
+
+available_models = [
+    Model(1, 'swin_tiny_patch4_window7_224.ms_in22k_ft_in1k', num_classes=30),
+    Model(2, 'swin_small_patch4_window7_224.ms_in22k_ft_in1k', num_classes=30),
+    Model(3, 'swin_base_patch4_window7_224.ms_in22k_ft_in1k', num_classes=30),
+    Model(4, 'swin_large_patch4_window7_224.ms_in22k_ft_in1k', num_classes=30)
+]

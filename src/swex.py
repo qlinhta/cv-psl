@@ -1,16 +1,21 @@
+import os
+
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
+
 import argparse
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from builder import loader, augment, device
+from torchvision.utils import save_image
+
+from swin.swinc_loader import loader, augment, device
 from tools import figure_train_val
 from tqdm import tqdm
 from prettytable import PrettyTable
 import logging
 import coloredlogs
 import os
-from models import get_model_by_id
-from torchvision.utils import save_image
+from swin.swinc import SwinC
 
 logger = logging.getLogger(__name__)
 coloredlogs.install(level='INFO', logger=logger, fmt='%(asctime)s [%(levelname)s] %(message)s')
@@ -36,12 +41,11 @@ def save_batch_images(images, labels, phase, num_images=8):
         save_image(images[i], os.path.join(dump_dir, f'image_{i}_label_{labels[i].item()}.png'))
 
 
-def train_model(train_loader, val_loader, device, model_id, num_epochs=10):
-    model_info = get_model_by_id(model_id)
-    model = model_info.get_model().to(device)
-    model_name = model_info.name
+def train_model(train_loader, val_loader, device, model_id, num_classes, num_epochs=10):
+    model = SwinC(model_id=model_id, num_classes=num_classes).to(device)
+    model_name = "SwinC"
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.AdamW(model.parameters(), lr=5.7e-06)
+    optimizer = optim.AdamW(model.parameters(), lr=5e-05)
 
     acc_train, acc_val = [], []
     loss_train, loss_val = [], []
@@ -56,13 +60,14 @@ def train_model(train_loader, val_loader, device, model_id, num_epochs=10):
         correct = 0
         total = 0
         train_bar = tqdm(train_loader, desc=f"Epoch {epoch + 1}/{num_epochs} Training")
-        for batch_idx, (images, labels) in enumerate(train_bar):
+        for batch_idx, (images, labels, text_inputs) in enumerate(train_bar):
             if not train_images_saved:
                 save_batch_images(images, labels, 'train')
                 train_images_saved = True
             images, labels = images.to(device), labels.to(device)
+            text_inputs = {k: v.to(device) for k, v in text_inputs.items()}  # Move text_inputs to device
             optimizer.zero_grad()
-            outputs = model(images)
+            outputs = model(images, text_inputs)
             loss = criterion(outputs, labels)
             loss.backward()
             optimizer.step()
@@ -85,12 +90,13 @@ def train_model(train_loader, val_loader, device, model_id, num_epochs=10):
         total = 0
         val_bar = tqdm(val_loader, desc=f"Epoch {epoch + 1}/{num_epochs} Validation")
         with torch.no_grad():
-            for batch_idx, (images, labels) in enumerate(val_bar):
+            for batch_idx, (images, labels, text_inputs) in enumerate(val_bar):
                 if not val_images_saved:
                     save_batch_images(images, labels, 'val')
                     val_images_saved = True
                 images, labels = images.to(device), labels.to(device)
-                outputs = model(images)
+                text_inputs = {k: v.to(device) for k, v in text_inputs.items()}  # Move text_inputs to device
+                outputs = model(images, text_inputs)
                 loss = criterion(outputs, labels)
                 val_loss += loss.item()
                 _, predicted = torch.max(outputs, 1)
@@ -121,6 +127,8 @@ if __name__ == "__main__":
     parser.add_argument('--val_csv', type=str, required=True, help="Path to the validation labels CSV file")
     parser.add_argument('--train_dir', type=str, required=True, help="Path to the train images directory")
     parser.add_argument('--val_dir', type=str, required=True, help="Path to the validation images directory")
+    parser.add_argument('--train_text', type=str, required=True, help="Path to the train text prompts CSV file")
+    parser.add_argument('--val_text', type=str, required=True, help="Path to the validation text prompts CSV file")
     parser.add_argument('--batch_size', type=int, default=32, help="Batch size for the dataloaders")
     parser.add_argument('--num_workers', type=int, default=8, help="Number of workers for the dataloaders")
     parser.add_argument('--num_epochs', type=int, default=10, help="Number of epochs for training")
@@ -130,8 +138,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     logger.info("Using model ID: {}".format(args.model_id))
-    model_info = get_model_by_id(args.model_id)
-    logger.info("Using model: {}".format(model_info.name))
     logger.info("Number of output classes: {}".format(args.num_classes))
     logger.info("Number of epochs: {}".format(args.num_epochs))
     logger.info("Batch size: {}".format(args.batch_size))
@@ -144,6 +150,8 @@ if __name__ == "__main__":
         args.val_csv,
         args.train_dir,
         args.val_dir,
+        args.train_text,
+        args.val_text,
         args.batch_size,
         args.num_workers,
         train_transform,
@@ -158,4 +166,4 @@ if __name__ == "__main__":
             for filename in os.listdir(dump_dir):
                 os.remove(os.path.join(dump_dir, filename))
 
-    train_model(train_loader, val_loader, device, args.model_id, args.num_epochs)
+    train_model(train_loader, val_loader, device, args.model_id, args.num_classes, args.num_epochs)
