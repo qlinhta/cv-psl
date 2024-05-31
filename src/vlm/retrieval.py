@@ -8,7 +8,7 @@ from rich.logging import RichHandler
 from rich.progress import track
 import logging
 import argparse
-from concurrent.futures import ProcessPoolExecutor
+from concurrent.futures import ThreadPoolExecutor
 
 logging.basicConfig(level="INFO", format="%(message)s", datefmt="[%X]", handlers=[RichHandler()])
 logger = logging.getLogger("rich")
@@ -21,13 +21,10 @@ model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-capt
 
 def generate_caption(image_path):
     image = Image.open(image_path).convert('RGB')
-
     inputs = processor(images=image, return_tensors="pt").to(device)
     pixel_values = inputs['pixel_values']
-
     out = model.generate(pixel_values=pixel_values, max_length=50)
     caption = processor.decode(out[0], skip_special_tokens=True)
-
     return os.path.splitext(os.path.basename(image_path))[0], caption
 
 
@@ -40,17 +37,14 @@ def process_image(args):
 def generate_prompts(image_dir, output_file, num_workers=8):
     image_files = [f for f in os.listdir(image_dir) if f.lower().endswith(('jpg', 'jpeg', 'png'))]
     os.makedirs(os.path.dirname(output_file), exist_ok=True)
-
     with open(output_file, 'w') as f:
         f.write('image,prompt\n')
-
-    with ProcessPoolExecutor(max_workers=num_workers) as executor:
+    with ThreadPoolExecutor(max_workers=num_workers) as executor:
         for img_name, caption in track(executor.map(process_image, [(image_dir, img_name) for img_name in image_files]),
                                        total=len(image_files), description="Processing..."):
             with open(output_file, 'a') as f:
                 f.write(f"{img_name},{caption}\n")
                 f.flush()
-
     logger.info(f"Prompts saved to {output_file}")
 
 
