@@ -22,8 +22,8 @@ class SwinC(nn.Module):
         self.dropout = nn.Dropout(p=0.6)
         self.bn = nn.BatchNorm1d(clip_feature_dim)
 
-        self.gmu = GatedMultimodalUnit(image_dim=clip_feature_dim, text_dim=clip_feature_dim, hidden_dim=512)
-        combined_dim = 512
+        self.gmu = GatedMultimodalUnit(image_dim=clip_feature_dim, text_dim=clip_feature_dim, hidden_dim=1024)
+        combined_dim = 1024
 
         self.fc = nn.Linear(combined_dim, num_classes)
 
