@@ -56,17 +56,37 @@ plt.rc('legend', fontsize=18)
 plt.rc('lines', markersize=10)
 ```
 
+Backbones available for the model are the following:
+```python
+model_names = [
+            'swin_tiny_patch4_window7_224.ms_in22k_ft_in1k',
+            'swin_small_patch4_window7_224.ms_in22k_ft_in1k',
+            'swin_base_patch4_window7_224.ms_in22k_ft_in1k',
+            'swin_large_patch4_window7_224.ms_in22k_ft_in1k'
+        ]
+```
+
 To put all images in train, val and test folders, and generate label files, run the following command:
 ```bash
 python3 src/dataset.py --raw_dataset [raw-data-folder] --output_dataset [output-folder] --classes_file [classes-indexes-file]
 ```
 
-To train the model, run the following command:
+Bird detection and cropping can be done using the following command:
 ```bash
-python3 ./src/main.py --train_csv [train-csv-file] --val_csv [val-csv-file] --train_dir [train-folder] --val_dir [val-folder] --batch_size [batch-size] --num_workers [num-workers] --num_epochs [num-epochs] --model_name [model-name]
+python3 ./src/cropped.py --input ./dataset/ --output ./cropped/
+```
+
+Generate caption images for the train, val and test folders:
+```bash
+python3 ./src/vlm/retrieval.py --train_dir ./dataset/train/ --val_dir ./dataset/val --test_dir ./dataset/test/
+```
+
+To train the model SwinC, run the following command:
+```bash
+python3 ./src/swex.py --train_csv ./dataset/train.csv --val_csv ./dataset/val.csv --train_dir ./cropped/train --val_dir ./cropped/val --train_text ./dataset/train_prompts.csv --val_text ./dataset/val_prompts.csv --batch_size 32 --num_workers 8 --num_epochs 10 --model_id 1
 ```
 
 To test the model, run the following command:
 ```bash
-python3 ./src/inference.py --test_dir [test-folder] --model_name [model-name] --num_classes [num-classes]
+python3 ./src/inference.py --test_dir ./cropped/test --num_classes 30 --model_id 1
 ```

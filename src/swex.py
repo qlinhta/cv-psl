@@ -45,7 +45,8 @@ def train_model(train_loader, val_loader, device, model_id, num_classes, num_epo
     model = SwinC(model_id=model_id, num_classes=num_classes).to(device)
     model_name = "SwinC"
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.AdamW(model.parameters(), lr=5e-05)
+    optimizer = optim.AdamW(model.parameters(), lr=5e-05, weight_decay=1e-4)
+    scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=num_epochs * len(train_loader))
 
     acc_train, acc_val = [], []
     loss_train, loss_val = [], []
@@ -65,12 +66,13 @@ def train_model(train_loader, val_loader, device, model_id, num_classes, num_epo
                 save_batch_images(images, labels, 'train')
                 train_images_saved = True
             images, labels = images.to(device), labels.to(device)
-            text_inputs = {k: v.to(device) for k, v in text_inputs.items()}  # Move text_inputs to device
+            text_inputs = {k: v.to(device) for k, v in text_inputs.items()}
             optimizer.zero_grad()
             outputs = model(images, text_inputs)
             loss = criterion(outputs, labels)
             loss.backward()
             optimizer.step()
+            scheduler.step()
             running_loss += loss.item()
 
             _, predicted = torch.max(outputs, 1)
@@ -95,7 +97,7 @@ def train_model(train_loader, val_loader, device, model_id, num_classes, num_epo
                     save_batch_images(images, labels, 'val')
                     val_images_saved = True
                 images, labels = images.to(device), labels.to(device)
-                text_inputs = {k: v.to(device) for k, v in text_inputs.items()}  # Move text_inputs to device
+                text_inputs = {k: v.to(device) for k, v in text_inputs.items()}
                 outputs = model(images, text_inputs)
                 loss = criterion(outputs, labels)
                 val_loss += loss.item()

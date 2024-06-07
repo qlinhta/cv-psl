@@ -19,11 +19,11 @@ class SwinC(nn.Module):
         swin_feature_dim = self.swin_model.feature_info[-1]['num_chs']
         clip_feature_dim = self.clip_model.config.text_config.hidden_size
         self.proj_swin = nn.Linear(swin_feature_dim * 7 * 7, clip_feature_dim)
-        self.dropout = nn.Dropout(p=0.6)
+        self.dropout = nn.Dropout(p=0.5)
         self.bn = nn.BatchNorm1d(clip_feature_dim)
 
-        self.gmu = GatedMultimodalUnit(image_dim=clip_feature_dim, text_dim=clip_feature_dim, hidden_dim=1024)
-        combined_dim = 1024
+        self.gmu = GatedMultimodalUnit(image_dim=clip_feature_dim, text_dim=clip_feature_dim, hidden_dim=512)
+        combined_dim = 512
 
         self.fc = nn.Linear(combined_dim, num_classes)
 
@@ -45,7 +45,7 @@ class GatedMultimodalUnit(nn.Module):
         self.fc_image = nn.Linear(image_dim, hidden_dim)
         self.fc_text = nn.Linear(text_dim, hidden_dim)
         self.gate = nn.Linear(image_dim + text_dim, hidden_dim)
-        self.dropout = nn.Dropout(p=0.6)
+        self.dropout = nn.Dropout(p=0.5)
         self.bn = nn.BatchNorm1d(hidden_dim)
 
     def forward(self, image_features, text_features):

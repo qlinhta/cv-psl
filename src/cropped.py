@@ -10,8 +10,8 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 
 
 def load_yolo_model():
-    model = YOLO('yolov8n.pt')
-    logging.info("YOLOv8 model loaded successfully.")
+    model = YOLO('yolov8x.pt')
+    logging.info("YOLOv10 model loaded successfully.")
     return model
 
 
